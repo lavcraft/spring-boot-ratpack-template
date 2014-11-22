@@ -5,16 +5,14 @@ buildscript {
         jcenter()
     }
     dependencies {
-        classpath("org.springframework.boot:spring-boot-gradle-plugin:1.1.8.RELEASE")
+        classpath("org.springframework.boot:spring-boot-gradle-plugin:+")
+        classpath 'org.springframework:springloaded:1.2.0.RELEASE'
     }
 }
-
-
 plugins {
     id "io.ratpack.ratpack-groovy" version "0.9.10"
     id "org.gradle.idea"
 }
-apply plugin: 'spring-boot'
 
 repositories {
     mavenLocal()
@@ -22,16 +20,21 @@ repositories {
     maven { url "http://repo.spring.io/libs-release" }
 }
 
+
+apply from: '.config/ide.gradle'
 apply from: 'https://raw.githubusercontent.com/lavcraft/gradle-templates-configs/master/libraries.gradle'
+apply plugin: 'spring-boot'
+apply plugin: 'groovy'
+
 dependencies {
-    runtime ratpack.dependency('jackson')
-    runtime ratpack.dependency('spring-boot')
+    compile ratpack.dependency('jackson')
+    compile ratpack.dependency('spring-boot')
 
     compile libraries.'spring-boot'
     compile libraries.'logback-classic'
+    compile libraries.groovy
 
     springloaded "org.springframework:springloaded:+"
-    // See here for a non blocking appender http://logging.apache.org/log4j/2.x/manual/async.html
     runtime 'org.slf4j:slf4j-simple:1.7.7'
 
     testCompile "org.spockframework:spock-core:0.7-groovy-2.0", {
@@ -43,7 +46,24 @@ run {
     jvmArgs "-Dratpack.port=8081"
     systemProperty "ratpack.reloadable", "true"
 }
+
+tasks.bootRun.doFirst {
+    copy {
+        from 'src/ratpack'
+        into '.'
+        include 'Ratpack.groovy'
+    }
+}
+
 bootRun {
     jvmArgs "-Dratpack.port=8081"
     systemProperty "ratpack.reloadable", "true"
+}
+
+build.doFirst {
+    file('Ratpack.groovy').delete()
+}
+
+clean.doLast {
+    file('Ratpack.groovy').delete()
 }
