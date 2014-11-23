@@ -64,6 +64,14 @@ build.doFirst {
     file('Ratpack.groovy').delete()
 }
 
+build.doLast {
+    copy {
+        from 'src/ratpack'
+        into "$buildDir/libs"
+        include 'Ratpack.groovy'
+    }
+}
+
 clean.doLast {
     file('Ratpack.groovy').delete()
 }
